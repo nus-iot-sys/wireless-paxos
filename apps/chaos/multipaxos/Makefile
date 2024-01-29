@@ -1,4 +1,5 @@
-#TARGET ?= sky
+all:
+	$(MAKE) cooja TARGET=sky log=0 printf=1 tx=31 mch=1 pch=4 sec=5 src=2 sync=0 failure=0 dynamic=1 initiator=3 interval=39 max_node_count=50 duration=15 description=“multipaxos” -j4
 
 CONTIKI_PROJECT = multipaxos-app
 CONTIKI_WITH_CHAOS = 1
@@ -22,7 +23,3 @@ include $(CONTIKI)/platform/wsn430/Makefile.common
 
 
 id: burn-nodeid.upload
-
-all: 
-	log=0 printf=1 tx=31 mch=1 pch=2 sec=5 src=2 sync=0 failure=0 dynamic=1 initiator=3 interval=39 max_node_count=50 duration=15 description=multipaxos
-	$(CONTIKI_PROJECT)

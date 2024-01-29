@@ -1,0 +1,9 @@
+.cache
+compile_commands.json
+
+obj_sky
+*.sky
+*.map
+*.a
+symbols.c
+symbols.h
