@@ -1,1 +1,0 @@
-CONTIKI_SOURCEFILES += rx-test.c

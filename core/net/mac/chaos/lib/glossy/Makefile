@@ -1,1 +1,0 @@
-CONTIKI_SOURCEFILES += glossy.c

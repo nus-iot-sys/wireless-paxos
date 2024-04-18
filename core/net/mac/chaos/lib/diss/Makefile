@@ -1,1 +1,0 @@
-CONTIKI_SOURCEFILES += diss.c
