@@ -33,7 +33,7 @@ volatile uint32_t cooja_randomseed;
 volatile uint16_t cooja_request_randomseed;
 
 #define HEXC(c) (((c) & 0xf) <= 9 ? ((c) & 0xf) + '0' : ((c) & 0xf) + 'a' - 10)
-#define COOJA_DEBUG_STR(str) do { cooja_debug_ptr = str; } while(0);
+#define COOJA_DEBUG_STR(str) do {  } while(0);
 #define COOJA_DEBUG_STRX(msg, val, width)                      \
         do {                                            \
           char tmp[64] = msg;                           \

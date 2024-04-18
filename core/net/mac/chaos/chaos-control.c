@@ -68,7 +68,7 @@
 #warning "System stress test activated: Rebooting every CHAOS_SYSTEM_STRESS_TEST rounds"
 #endif
 
-#define CHAOS_SLOT_TIMING_PROFILE 1
+#define CHAOS_SLOT_TIMING_PROFILE 0
 
 #define DCO_SYNC_PERIOD 10 //seconds
 
