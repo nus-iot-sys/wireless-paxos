@@ -38,6 +38,7 @@
  *         Olaf Landsiedel <olafl@chalmers.se>
  */
 
+#include <stdint.h>
 #include <string.h>
 #include "contiki.h"
 
@@ -94,6 +95,8 @@ uint8_t not_heard_from_leader_since = 0;
 static int tx = 0;
 /* are all flags set */
 static int complete = 0;
+
+static uint16_t commit_slot;
 /* Slot at which all flags were set for the first time,
 Slot at which we stopped participating in the round */
 static uint16_t completion_slot, off_slot;
@@ -363,10 +366,13 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
          * We can have a Quorum Read for 'free' simply by reading the
          * number of flags
          */
-        if (payload->phase == MULTIPAXOS_ACCEPT && n_replies > chaos_node_count / 2) /* We are in phase ACCEPT (2) and we know
+        if (payload->phase == MULTIPAXOS_ACCEPT && n_replies > MAX_NODE_COUNT / 2) /* We are in phase ACCEPT (2) and we know
                                                                                         that a majority accepted the value*/
         {
           values_chosen_this_round = 1;
+          if (commit_slot == 0) {
+            commit_slot = slot_count;
+          }
           /* we write the value into the log of chosen values */
           uint8_t i;
           for (i = 0; i < MULTIPAXOS_PKT_SIZE; ++i) {
@@ -443,7 +449,7 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
               }
 
               /* if majority => switch to next phase */
-              if (!lost_proposal && n_replies > chaos_node_count / 2) {
+              if (!lost_proposal && n_replies > MAX_NODE_COUNT / 2) {
                 multipaxos_state.leader.phase = MULTIPAXOS_ACCEPT;
                 update_phase = 2; /*from phase 1 to 2 */
               }
@@ -458,7 +464,7 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
               }
 
               /* check majority */
-              if (!lost_proposal && n_replies > chaos_node_count / 2) {
+              if (!lost_proposal && n_replies > MAX_NODE_COUNT / 2) {
                 if (!multipaxos_state.leader.got_majority) {
                   multipaxos_state.leader.got_majority = 1;
                   /* save next round */
@@ -678,6 +684,8 @@ int multipaxos_is_pending(const uint16_t round_count) { return 1; }
 /* Report the slot at which Synchrotron received all flags set for the first time */
 uint16_t multipaxos_get_completion_slot() { return completion_slot; }
 
+uint16_t multipaxos_get_commit_slot() { return commit_slot; }
+
 /* Report the slot at which Synchrotron went to off state */
 uint16_t multipaxos_get_off_slot() { return off_slot; }
 
@@ -723,6 +731,7 @@ void multipaxos_initialize_variables_for_new_round() {
   got_valid_rx = 0;
   complete = 0;
   completion_slot = 0;
+  commit_slot = 0;
   tx_count_complete = 0;
   invalid_rx_count = 0;
   values_chosen_this_round = 0;
@@ -762,6 +771,8 @@ void multipaxos_set_leader_values(multipaxos_value_t multipaxos_values[]) {
     /* we did not get a majority, we should keep the old values */
   }
 }
+
+uint8_t multipaxos_value_chosen_this_round() { return values_chosen_this_round; }
 
 void multipaxos_report_values_chosen_this_round(multipaxos_value_t learned_values[]) {
   if (values_chosen_this_round) {

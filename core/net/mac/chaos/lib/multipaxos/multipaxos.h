@@ -45,6 +45,7 @@
 #include "chaos-config.h"
 #include "chaos.h"
 #include "testbed.h"
+#include <stdint.h>
 
 /* Print more details about Wireless Multi-Paxos results */
 #ifndef MULTIPAXOS_PRINT_DETAILS
@@ -262,6 +263,10 @@ int multipaxos_get_flags_length(void);
 /* Report the slot at which Synchrotron received all flags set for the first
  * time */
 uint16_t multipaxos_get_completion_slot();
+
+uint16_t multipaxos_get_commit_slot();
+
+uint8_t multipaxos_value_chosen_this_round();
 
 /* Report the slot at which Synchrotron went to off state */
 uint16_t multipaxos_get_off_slot();

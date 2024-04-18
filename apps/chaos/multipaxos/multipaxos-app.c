@@ -54,7 +54,11 @@ static uint8_t success = 0;
 static uint16_t round_count_local = 0;
 static uint8_t* flags;
 static uint16_t complete = 0;
+static uint16_t commit = 0;
 static uint16_t off_slot;
+static uint16_t value_chosen = 0;
+
+void multipaxos_app_print_advanced_statistics();
 
 /* defined at the end of this file */
 /* starts a multi-paxos round */
@@ -84,6 +88,7 @@ AUTOSTART_PROCESSES(&chaos_multipaxos_app_process);
 PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
   PROCESS_BEGIN();
   printf("{boot} Wireless Multi-Paxos Application\n");
+  printf("Multi-Paxos node num: %d\n", chaos_node_count);
   NETSTACK_MAC.on();
 
   while (1) {
@@ -92,11 +97,13 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
     /* node has Synchrotron group membership */
     if (chaos_has_node_index) {
       /* final values agreed upon, if any */
-      if (success) {
+      if (value_chosen) {
         printf("{rd %u chosen values} ", round_count_local);
         uint8_t i;
         for (i = 0; i < MULTIPAXOS_PKT_SIZE; i++) printf("%u,", multipaxos_chosen_values[i]);
         printf("\n");
+        printf("{rd %u commit} %u ms\n", round_count_local, commit*6); /* 1 slot = 6ms */
+        printf("{rd %u complete} %u ms\n", round_count_local, complete*6); /* 1 slot = 6ms */
 
       } else {
         printf("{rd %u chosen values} No values were chosen this round.\n", round_count_local);
@@ -136,6 +143,9 @@ static void round_begin(const uint16_t round_count, const uint8_t id) {
   /* Retrieve full completion (Synchrotron) latency */
   off_slot = multipaxos_get_off_slot();
   complete = multipaxos_get_completion_slot();
+  commit = multipaxos_get_commit_slot();
+  value_chosen = multipaxos_value_chosen_this_round();
+  
   /* Update belief of round number */
   round_count_local = round_count;
 
