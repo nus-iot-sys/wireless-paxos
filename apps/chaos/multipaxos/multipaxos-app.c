@@ -88,7 +88,7 @@ AUTOSTART_PROCESSES(&chaos_multipaxos_app_process);
 PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
   PROCESS_BEGIN();
   printf("{boot} Wireless Multi-Paxos Application\n");
-  printf("Multi-Paxos node num: %d\n", chaos_node_count);
+  printf("Multi-Paxos node num: %d\n", MAX_NODE_COUNT);
   NETSTACK_MAC.on();
 
   while (1) {

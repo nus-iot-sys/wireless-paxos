@@ -305,7 +305,8 @@ CFLAGS += -D_param_sync=$(sync)
 CFLAGS += -D_param_sec=$(sec) #security level
 CFLAGS += -DINITIATOR_NODE=$(initiator)
 CFLAGS += -DFAILURES_RATE=$(failures)
-CFLAGS += -D_param_max_node_count=$(max_node_count)
+CFLAGS += -D_param_max_node_count=$(nodes)
+
 CFLAGS += -DCHAOS_LEADER_ELECTION_TIMEOUT=$(election_to)
 
 empty:=
@@ -316,11 +317,6 @@ EXPERIMENT_PARAM=$(subst $(space),,$(EXPERIMENT_PARAM_TMP))
 
 %.hex: %.ihex
 	cp $*.ihex $*.hex
-	
-bytes: $(CONTIKI_PROJECT)
-	msp430-size $(CONTIKI_PROJECT).${TARGET}
-#	$(OBJDUMP) -h $(CONTIKI_PROJECT).sky | perl -ne '$$b{$$1}=hex $$2 if /^\s*\d+\s*\.(text|data|bss|chaos)\s+(\S+)/; END { printf("%16d bytes in ROM\n%16d bytes in RAM\n",$$b{text}+$$b{data},$$b{data}+$$b{bss}); }'
-	@echo '    ' `date`
 
 #motesdynamic: CFLAGS+=-DTESTBED=motes -DCOOJA=0
 #motesdynamic: bytes
@@ -374,8 +370,8 @@ rennes-motes: bytes $(CONTIKI_PROJECT).ihex
 		
 cooja-rennes: CFLAGS+=-DTESTBED=rennes -DCOOJA=1
 cooja-rennes: bytes $(CONTIKI_PROJECT).ihex
-	cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).cooja06.sky
-	cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).cooja32.sky
+	# cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).cooja06.sky
+	# cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).cooja32.sky
 				
 flocklab: CFLAGS+=-DWITH_TINYOS_AUTO_IDS=1 -DTESTBED=flocklab -DCOOJA=0
 flocklab: bytes 
@@ -410,11 +406,6 @@ cooja-indriya: bytes
 #cooja-indriya-dynamic: CFLAGS+=-DWITH_TINYOS_AUTO_IDS=1 -DWITH_TINYOS_FRAME=1 -DCOOJA=1 -DTESTBED=indriya
 #cooja-indriya-dynamic: bytes
 #	cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).coojaindriya.sky	
-	
-cooja: CFLAGS+=-DCOOJA=1 -DWITH_TINYOS_AUTO_IDS=1 -DTESTBED=cooja
-cooja: bytes
-	cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).cooja06.sky
-	cp $(CONTIKI_PROJECT).sky $(CONTIKI_PROJECT).cooja32.sky
 	
 #coojadynamic: CFLAGS+=-DCOOJA=1 -DTESTBED=cooja
 #coojadynamic: bytes
