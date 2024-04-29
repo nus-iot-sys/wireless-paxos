@@ -47,6 +47,7 @@
 #include "chaos.h"
 #include "multipaxos.h"
 #include "node.h"
+#include "lib/random.h"
 
 #undef ENABLE_COOJA_DEBUG
 #define ENABLE_COOJA_DEBUG COOJA
@@ -132,6 +133,10 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
   multipaxos_t *payload = rx_multipaxos;
   if (current_state == CHAOS_TX) {
     payload = tx_multipaxos;
+  } else if (current_state == CHAOS_RX) {
+    if (random_rand() % 100 < _param_rx_failure_percentage) {
+      chaos_txrx_success = 0;
+    }
   }
   /* Is the RX packet containing novel information */
   uint8_t rx_delta = 0;
@@ -644,14 +649,6 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
 
   /* save tx buffer in the local state */
   memcpy(&multipaxos_local, tx_multipaxos, sizeof(multipaxos_t));
-
-/* Inject random failures - for evaluation */
-#if FAILURES_RATE
-#warning "INJECT_FAILURES!!"
-  if (chaos_random_generator_fast() < 1 * (CHAOS_RANDOM_MAX / (FAILURES_RATE))) {
-    next_state = CHAOS_OFF;
-  }
-#endif
 
 /* Advanced logging */
 #if MULTIPAXOS_ADVANCED_STATISTICS
