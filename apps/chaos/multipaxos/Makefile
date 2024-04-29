@@ -1,5 +1,5 @@
 CONTIKI_PROJECT = multipaxos-app
-TARGET ?= sky
+TARGET = sky
 
 log=0
 printf=1 
@@ -9,26 +9,34 @@ pch=0
 sec=0
 src=2
 sync=0
-failure=0
 initiator=3
 interval=39
 
-$(if $(nodes),,$(error Please specify the number of nodes with make nodes=))
 
-FIRMWARE = firmware/multipaxos-app_n$(nodes).$(TARGET)
+FIRMWARE = firmware/multipaxos-app_n$(nodes)f$(failure).$(TARGET)
 
-all: make_firmware
+all: $(FIRMWARE)
 
-.PHONY: make_firmware
-make_firmware: $(CONTIKI_PROJECT)
-	mv $(CONTIKI_PROJECT).$(TARGET) $(FIRMWARE)
+$(FIRMWARE): check_param $(CONTIKI_PROJECT) firmware/
+	mv $(CONTIKI_PROJECT).$(TARGET) $@
+
+.PHONY: check_param
+check_param:
+	$(if $(nodes),,$(error Please specify the number of nodes with make nodes=))
+	$(if $(failure),,$(error Please specify RX failure rate with make failure=))
+
+firmware/:
+	mkdir -p $@
+
 
 CONTIKI_WITH_CHAOS = 1
 CHAOS_NODE_DYNAMIC=1
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
+CFLAGS += -D_param_max_node_count=$(nodes)
+CFLAGS += -D_param_rx_failure_percentage=$(failure)
 
-CFLAGS+=-DCOOJA=1 -DWITH_TINYOS_AUTO_IDS=1 
+CFLAGS += -DCOOJA=1 -DWITH_TINYOS_AUTO_IDS=1 
 
 CONTIKI = ../../..
 include $(CONTIKI)/Makefile.include

@@ -279,13 +279,11 @@ mch?=0 #channel hopping
 pch?=0 #parallel channels
 tx?=TXPW0 #tx power (0 is highest, 7 is lowest)
 site?=rennes #testbed
-initiator?=0xca73 #initiator node id
 duration?=5 #duration of the experiment on the testbed
 sync?=0 # 1: sync on every packet,  2: sync when app requests, 0: sync only on the first rx packet in the round
 user?='alnahas' #username for the testbed
 sec?=0 #HW security level: 0-disabled, 5-authentication with 2 bytes. - Compatible with 802.15.4
 description?=""
-failures?=0 # inject failures in vote, 2pc, 3pc with a probability of 1/failures
 max_node_count?=0
 election_to?=64 # leader election timeout in rounds. Each round loops on the channels for CHAOS_ASSOCIATION_HOP_CHANNEL_THERSHOLD times (2*16 by default, checking every channel twice on average)
 
@@ -304,8 +302,6 @@ CFLAGS += -D_param_txpw=$(tx)
 CFLAGS += -D_param_sync=$(sync)
 CFLAGS += -D_param_sec=$(sec) #security level
 CFLAGS += -DINITIATOR_NODE=$(initiator)
-CFLAGS += -DFAILURES_RATE=$(failures)
-CFLAGS += -D_param_max_node_count=$(nodes)
 
 CFLAGS += -DCHAOS_LEADER_ELECTION_TIMEOUT=$(election_to)
 

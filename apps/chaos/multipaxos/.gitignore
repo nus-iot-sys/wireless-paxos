@@ -1,5 +1,7 @@
-.cache
+.cache/
 compile_commands.json
+
+firmware/
 
 obj_sky
 *.sky

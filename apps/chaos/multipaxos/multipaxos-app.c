@@ -40,6 +40,7 @@
  */
 
 #include "contiki.h"
+#include <stdint.h>
 #include <stdio.h> /* For printf() */
 #include "net/netstack.h"
 
@@ -97,13 +98,20 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
     /* node has Synchrotron group membership */
     if (chaos_has_node_index) {
       /* final values agreed upon, if any */
+      if (IS_INITIATOR()) {
+        printf("<PP> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, 0, 0); /* 1 slot = 6ms */
+      }
       if (value_chosen) {
-        printf("{rd %u chosen values} ", round_count_local);
+        // printf("{rd %u chosen values} ", round_count_local);
         uint8_t i;
         for (i = 0; i < MULTIPAXOS_PKT_SIZE; i++) printf("%u,", multipaxos_chosen_values[i]);
         printf("\n");
-        printf("{rd %u commit} %u ms\n", round_count_local, commit*6); /* 1 slot = 6ms */
-        printf("{rd %u complete} %u ms\n", round_count_local, complete*6); /* 1 slot = 6ms */
+        printf("<CM> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, commit, commit * 6); /* 1 slot = 6ms */
+        if (IS_INITIATOR()) {
+          uint16_t complete_slot = multipaxos_get_completion_slot();
+          printf("<CP> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, complete_slot, complete_slot * 6); /* 1 slot = 6ms */
+        }
+        // printf("{rd %u complete} %u ms\n", round_count_local, complete*6); /* 1 slot = 6ms */
 
       } else {
         printf("{rd %u chosen values} No values were chosen this round.\n", round_count_local);
@@ -129,6 +137,8 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
 
 /* Perform initial computation before each Wireless Multi-Paxos round */
 static void round_begin(const uint16_t round_count, const uint8_t id) {
+  /* Update belief of round number */
+  round_count_local = round_count;
   /* if node is Synchrotron initiator, let us define it as the leader as well */
   if (IS_INITIATOR()) {
     is_proposer = 1;
@@ -145,9 +155,6 @@ static void round_begin(const uint16_t round_count, const uint8_t id) {
   complete = multipaxos_get_completion_slot();
   commit = multipaxos_get_commit_slot();
   value_chosen = multipaxos_value_chosen_this_round();
-  
-  /* Update belief of round number */
-  round_count_local = round_count;
 
   process_poll(&chaos_multipaxos_app_process);
 }
