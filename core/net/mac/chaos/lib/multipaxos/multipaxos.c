@@ -40,7 +40,9 @@
 
 #include <stdint.h>
 #include <string.h>
+#include "configs/common.h"
 #include "contiki.h"
+#include "project-conf.h"
 
 #include "chaos-config.h"
 #include "chaos-random-generator.h"
@@ -49,8 +51,7 @@
 #include "node.h"
 #include "lib/random.h"
 
-#undef ENABLE_COOJA_DEBUG
-#define ENABLE_COOJA_DEBUG COOJA
+#define ENABLE_COOJA_DEBUG 1
 #include "dev/cooja-debug.h"
 
 #ifndef COMMIT_THRESHOLD
@@ -120,6 +121,18 @@ static multipaxos_state_t multipaxos_state;
 /* Current flags */
 static uint8_t *multipaxos_flags;
 
+static chaos_state_t
+sync_round_process_slot(uint16_t round, uint16_t slot, chaos_state_t state,
+                        int success, size_t payload_length, uint8_t *rx,
+                        uint8_t *tx, uint8_t **app_flags)
+{
+  if (random_rand() % 100 < 20) {
+    return CHAOS_TX_SYNC;
+  } else {
+    return CHAOS_RX_SYNC;
+  }
+}
+
 /* Main function, called at each slot */
 static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_state_t current_state, int chaos_txrx_success,
                              size_t payload_length, uint8_t *rx_payload, uint8_t *tx_payload, uint8_t **app_flags) {
@@ -133,11 +146,15 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
   multipaxos_t *payload = rx_multipaxos;
   if (current_state == CHAOS_TX) {
     payload = tx_multipaxos;
-  } else if (current_state == CHAOS_RX) {
-    if (random_rand() % 100 < _param_rx_failure_percentage) {
+  }
+#if CW_CONF_RX_FAILURE_PERCENTAGE > 0
+  if (current_state == CHAOS_RX) {
+    if (random_rand() % 100 < CW_CONF_RX_FAILURE_PERCENTAGE) {
       chaos_txrx_success = 0;
     }
   }
+#endif /* CW_CONF_RX_FAILURE_PERCENTAGE > 0 */
+
   /* Is the RX packet containing novel information */
   uint8_t rx_delta = 0;
   /* Should we transmit next time */
@@ -147,7 +164,6 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
   if (chaos_txrx_success                                                          /* Last slot was successful */
       && (current_state == CHAOS_RX                                               /* and we were listening during this slot */
           || (current_state == CHAOS_TX && multipaxos_state.leader.is_leader))) { /* or we are a leader and were TX this slot */
-
     /* Reception was correct for this slot */
     got_valid_rx = 1;
 
@@ -162,6 +178,7 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
      */
     /* if min_proposal is 0, we haven't received any Paxos request yet */
     if (payload->phase == MULTIPAXOS_INIT) {
+      COOJA_DEBUG_PRINTF("init\n");
       /* ----- BEGIN LEADER - INITIATE PAXOS ALGORITHM (1/1) */
       if (multipaxos_state.leader.is_leader) {
         /* reset flags */
@@ -371,7 +388,7 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
          * We can have a Quorum Read for 'free' simply by reading the
          * number of flags
          */
-        if (payload->phase == MULTIPAXOS_ACCEPT && n_replies > MAX_NODE_COUNT / 2) /* We are in phase ACCEPT (2) and we know
+        if (payload->phase == MULTIPAXOS_ACCEPT && n_replies > chaos_node_count / 2) /* We are in phase ACCEPT (2) and we know
                                                                                         that a majority accepted the value*/
         {
           values_chosen_this_round = 1;
@@ -454,7 +471,7 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
               }
 
               /* if majority => switch to next phase */
-              if (!lost_proposal && n_replies > MAX_NODE_COUNT / 2) {
+              if (!lost_proposal && n_replies > chaos_node_count / 2) {
                 multipaxos_state.leader.phase = MULTIPAXOS_ACCEPT;
                 update_phase = 2; /*from phase 1 to 2 */
               }
@@ -469,7 +486,7 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
               }
 
               /* check majority */
-              if (!lost_proposal && n_replies > MAX_NODE_COUNT / 2) {
+              if (!lost_proposal && n_replies > chaos_node_count / 2) {
                 if (!multipaxos_state.leader.got_majority) {
                   multipaxos_state.leader.got_majority = 1;
                   /* save next round */
@@ -806,6 +823,13 @@ void multipaxos_report_values_chosen_this_round(multipaxos_value_t learned_value
 */
 uint8_t multipaxos_round_begin(const uint16_t round_number, const uint8_t app_id, uint8_t is_leader, multipaxos_value_t multipaxos_values[],
                            multipaxos_value_t learned_values[], uint8_t **final_flags) {
+
+  if (round_number <= CW_CONF_SYNC_ROUND_NUM) {
+      chaos_round(round_number, app_id, (const uint8_t const *)&multipaxos_local.multipaxos,
+              sizeof(multipaxos_t) + multipaxos_get_flags_length(), MULTIPAXOS_SLOT_LEN_DCO, MULTIPAXOS_ROUND_MAX_SLOTS,
+              multipaxos_get_flags_length(), sync_round_process_slot);
+    return 0;
+  }
 
   /* intilialize variables */
   multipaxos_initialize_variables_for_new_round();

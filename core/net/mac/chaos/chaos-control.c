@@ -139,11 +139,11 @@ chaos_post_processing()
   LEDS_ON(LEDS_RED);
   chaos_log_process_pending();
   int i;
-  printf("{rd %u stats} ", round_number);
-  for( i=0; i<CHAOS_SLOT_STATS_SIZE; i++ ){
-    printf("%u ", chaos_slot_stats[i]);
-  }
-  printf(" end\n");
+  // printf("{rd %u stats} ", round_number);
+  // for( i=0; i<CHAOS_SLOT_STATS_SIZE; i++ ){
+  //   printf("%u ", chaos_slot_stats[i]);
+  // }
+  // printf(" end\n");
 #if CHAOS_SLOT_TIMING_PROFILE
   //slot timing profile
   printf("{rd %u timing max} ", round_number);
@@ -161,7 +161,7 @@ chaos_post_processing()
   uint32_t tx_permil = (chaos_slot_timing_tx_sum);
   uint32_t rx_permil = (chaos_slot_timing_rx_sum);
   uint32_t dc_permil =  (chaos_slot_timing_tx_sum + chaos_slot_timing_rx_sum);
-  printf("{rd %u dc} interval %lu tx %lu + rx %lu = dc %lu [us]\n", round_number, RTIMER_TO_DCO_U32(CHAOS_INTERVAL), tx_permil, rx_permil, dc_permil);
+  // printf("{rd %u dc} interval %lu tx %lu + rx %lu = dc %lu [us]\n", round_number, RTIMER_TO_DCO_U32(CHAOS_INTERVAL), tx_permil, rx_permil, dc_permil);
 
 //  printf("{rd %u slots} ", round_number);
 //  for( i=0; i<sizeof(chaos_slot_log); i++ ){
@@ -456,13 +456,13 @@ PROCESS_THREAD(chaos_process, ev, data)
       /* Schedule next round and re-associate: if no sfd sync during the round or we missed the round start (or something else failed)*/
       do{
         current_round_begin = scheduler_get_next_round_begin();
-        COOJA_DEBUG_PRINTF("rr 0x%x %lx rb 0x%x %lx rb-w 0x%x wu 0x%x fs 0x%x n 0x%x\n",
-            VHT_TO_RTIMER(round_rtimer), (round_rtimer),
-            (uint16_t)current_round_begin, RTIMER_TO_VHT(current_round_begin),
-            (uint16_t)(current_round_begin - round_offset_to_radio_on - rtimer_delay - ROUND_GUARD_TIME),
-            (uint16_t)(VHT_TO_RTIMER(round_rtimer) + current_round_begin - round_offset_to_radio_on - rtimer_delay - ROUND_GUARD_TIME),
-            (uint16_t)(VHT_TO_RTIMER(round_rtimer) + current_round_begin),
-            RTIMER_NOW());
+        // COOJA_DEBUG_PRINTF("rr 0x%x %lx rb 0x%x %lx rb-w 0x%x wu 0x%x fs 0x%x n 0x%x\n",
+        //     VHT_TO_RTIMER(round_rtimer), (round_rtimer),
+        //     (uint16_t)current_round_begin, RTIMER_TO_VHT(current_round_begin),
+        //     (uint16_t)(current_round_begin - round_offset_to_radio_on - rtimer_delay - ROUND_GUARD_TIME),
+        //     (uint16_t)(VHT_TO_RTIMER(round_rtimer) + current_round_begin - round_offset_to_radio_on - rtimer_delay - ROUND_GUARD_TIME),
+        //     (uint16_t)(VHT_TO_RTIMER(round_rtimer) + current_round_begin),
+        //     RTIMER_NOW());
         rtimer_clock_t round_rtimer_rt = VHT_TO_RTIMER(round_rtimer);
         round_scheduled_offset = current_round_begin - round_offset_to_radio_on - ROUND_GUARD_TIME - rtimer_delay;
         success = chaos_schedule_round(&round_scheduler_timer, round_rtimer_rt, round_scheduled_offset, 1);

@@ -40,6 +40,8 @@
 #ifndef PROJECT_CONF_H_
 #define PROJECT_CONF_H_
 
+#include CW_CONFIG_HEADER
+
 #undef COOJA
 #define COOJA 1
 
@@ -138,10 +140,8 @@
 #define CHAOS_RF_CHANNEL _param_ch
 #endif
 
-#ifdef _param_max_node_count
-#undef MAX_NODE_COUNT
-#define MAX_NODE_COUNT _param_max_node_count
-#endif
+#define MAX_NODE_COUNT CW_CONF_NODE_NUM
+#define CHAOS_NODES MAX_NODE_COUNT
 
 #ifdef _param_mch
 #undef CHAOS_MULTI_CHANNEL

@@ -301,7 +301,6 @@ CFLAGS += -D_param_pch=$(pch)
 CFLAGS += -D_param_txpw=$(tx)
 CFLAGS += -D_param_sync=$(sync)
 CFLAGS += -D_param_sec=$(sec) #security level
-CFLAGS += -DINITIATOR_NODE=$(initiator)
 
 CFLAGS += -DCHAOS_LEADER_ELECTION_TIMEOUT=$(election_to)
 

@@ -84,7 +84,7 @@ const chaos_app_t* scheduler_round_begin(const uint16_t round_count, uint8_t* ap
     int i;
     for(i = 0; i < chaos_app_count; i++){
       if( chaos_apps[i]->is_pending(round_count + 1) ){
-        COOJA_DEBUG_PRINTF("scheduler: current app: %s, next app: %s, start %u", current_app->name, chaos_apps[i]->name, CHAOS_INTERVAL);
+        // COOJA_DEBUG_PRINTF("scheduler: current app: %s, next app: %s, start %u", current_app->name, chaos_apps[i]->name, CHAOS_INTERVAL);
         next_app = chaos_apps[i];
         next_app_id = i;
         next_round_begin = CHAOS_INTERVAL;
@@ -104,7 +104,7 @@ void scheduler_round_end(){
     //next_round_begin = CHAOS_INTERVAL;
     if( /*next_round_begin > 0 &&*/ next_app_id < chaos_app_count ){
       next_app = chaos_apps[next_app_id];
-      COOJA_DEBUG_PRINTF("scheduler: current app: %s, next app: %s, next begin %u", current_app ? current_app->name : "null", next_app ? next_app->name : "null", next_round_begin);
+      // COOJA_DEBUG_PRINTF("scheduler: current app: %s, next app: %s, next begin %u", current_app ? current_app->name : "null", next_app ? next_app->name : "null", next_round_begin);
     } else {
       next_app = NULL;
       PRINTF("Error: invalid data! Cannot schedule! next begin %u, next app id: %u\n", next_round_begin, next_app_id);

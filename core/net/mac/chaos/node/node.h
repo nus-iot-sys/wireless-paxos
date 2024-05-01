@@ -50,18 +50,6 @@ void set_stable_initiator(uint8_t x);
 void update_initiator_stability_status();
 uint8_t has_stable_initiator();
 
-#if _param_max_node_count != 0
-#define MAX_NODE_COUNT _param_max_node_count
-#endif
-
-#if !defined(MAX_NODE_COUNT) //&& !defined(MAX_NODE_COUNT_TESTBED)
-#error "MAX_NODE_COUNT is not defined"
-#endif
-
-//#ifndef MAX_NODE_COUNT
-//#define MAX_NODE_COUNT MAX_NODE_COUNT_TESTBED
-//#endif
-
 #if NETSTACK_CONF_WITH_CHAOS_NODE_DYNAMIC
 
 #if NETSTACK_CONF_WITH_CHAOS_LEADER_ELECTION
@@ -74,10 +62,6 @@ extern volatile uint8_t chaos_has_node_index;
 
 #define CHAOS_NODES chaos_node_count
 #else /* NETSTACK_CONF_WITH_CHAOS_NODE_DYNAMIC */
-
-#ifndef CHAOS_NODES
-#define CHAOS_NODES 1
-#endif
 
 extern uint8_t chaos_node_index;
 extern uint8_t chaos_has_node_index;

@@ -8,7 +8,7 @@
 #ifndef COOJA_DEBUG_H_
 #define COOJA_DEBUG_H_
 
-#if !ENABLE_COOJA_DEBUG
+#if 0
 
 #define HEXC(c)
 #define COOJA_DEBUG_STR(str)
@@ -44,7 +44,8 @@ volatile uint16_t cooja_request_randomseed;
           while( i > j - width - 1) { tmp[--i] = '0' + v%10; v /= 10; }  \
           cooja_debug_ptr = tmp;                        \
         } while(0);
-#define COOJA_DEBUG_LINE() COOJA_DEBUG_STRX(__FILE__,__LINE__,4)
+// #define COOJA_DEBUG_LINE() COOJA_DEBUG_STRX(__FILE__,__LINE__,4)
+#define COOJA_DEBUG_LINE()
 #define COOJA_DEBUG_POINT do { cooja_debug_point = !cooja_debug_point; } while(0);
 #define COOJA_DEBUG_CINT(c, val)
 //#define COOJA_DEBUG_CINT(c, val) if(node_id == 3) { char tmp[11] = {0}; uint32_t v = (val); int i=10; if(v==0) tmp[--i] = '0'; while(v) { tmp[--i] = '0' + v%10; v /= 10; } tmp[--i] = (c); cooja_debug_ptr = tmp+i;  }

@@ -57,7 +57,7 @@
   - local log of values
 */
 #ifndef MULTIPAXOS_ADVANCED_STATISTICS
-#define MULTIPAXOS_ADVANCED_STATISTICS 1
+#define MULTIPAXOS_ADVANCED_STATISTICS 0
 #endif
 
 /* Wireless Multi-Paxos require a slot of 6 ms at least on Tmote Sky boards */

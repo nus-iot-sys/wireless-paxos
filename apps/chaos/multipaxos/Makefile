@@ -9,32 +9,42 @@ pch=0
 sec=0
 src=2
 sync=0
-initiator=3
 interval=39
 
+CW_CONFIG_HEADER = configs/config_$(config).h
 
-FIRMWARE = firmware/multipaxos-app_n$(nodes)f$(failure).$(TARGET)
+FIRMWARE = firmware/multipaxos-app_$(config).$(TARGET)
 
 all: $(FIRMWARE)
 
-$(FIRMWARE): check_param $(CONTIKI_PROJECT) firmware/
+$(FIRMWARE): touch_config $(CONTIKI_PROJECT) firmware/
 	mv $(CONTIKI_PROJECT).$(TARGET) $@
 
-.PHONY: check_param
-check_param:
-	$(if $(nodes),,$(error Please specify the number of nodes with make nodes=))
-	$(if $(failure),,$(error Please specify RX failure rate with make failure=))
+.PHONY: touch_config
+touch_config:
+	@if [ -z $(config) ]; then \
+		echo "config is not set. Use 'make config=example' to set the configuration"; \
+		exit 1; \
+	fi
+	@if [ -f $(CW_CONFIG_HEADER) ]; then \
+		touch $(CW_CONFIG_HEADER); \
+		touch project-conf.h; \
+	else \
+		echo "Configuration $(config) does not exist"; \
+		exit 1; \
+	fi
 
 firmware/:
 	mkdir -p $@
 
+PROJECTDIRS += configs
+PROJECT_HEADERS += $(CW_CONFIG_HEADER)
 
 CONTIKI_WITH_CHAOS = 1
-CHAOS_NODE_DYNAMIC=1
+CHAOS_NODE_DYNAMIC=0
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
-CFLAGS += -D_param_max_node_count=$(nodes)
-CFLAGS += -D_param_rx_failure_percentage=$(failure)
+CFLAGS += -DCW_CONFIG_HEADER=\"$(CW_CONFIG_HEADER)\"
 
 CFLAGS += -DCOOJA=1 -DWITH_TINYOS_AUTO_IDS=1 
 

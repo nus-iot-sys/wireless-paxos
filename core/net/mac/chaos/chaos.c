@@ -1166,7 +1166,7 @@ uint8_t chaos_associate(rtimer_clock_t* t_sfd_actual_rtimer_ptr, uint16_t *round
           on();
           association_counter = 0;
           round_number++;
-          printf("{rd-%u st-%u ch-%u} ASC %s\n", round_number, slot_number, chaos_multichannel_get_current_channel(), CHAOS_RX_STATE_TO_STRING(rx_status));
+          // printf("{rd-%u st-%u ch-%u} ASC %s\n", round_number, slot_number, chaos_multichannel_get_current_channel(), CHAOS_RX_STATE_TO_STRING(rx_status));
         }
       } while(associated < 1 /*&& association_counter < CHAOS_ASSOCIATION_HOP_CHANNEL_THERSHOLD */); //XXX
         if( associated ){

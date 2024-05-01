@@ -39,11 +39,13 @@
  *
  */
 
+#include "configs/common.h"
 #include "contiki.h"
 #include <stdint.h>
 #include <stdio.h> /* For printf() */
 #include "net/netstack.h"
 
+#include "project-conf.h"
 #include "chaos-control.h"
 #include "node.h"
 #include "multipaxos.h"
@@ -85,6 +87,8 @@ PROCESS(chaos_multipaxos_app_process, "Wireless Multi-Paxos App Process");
 /* Autostart application */
 AUTOSTART_PROCESSES(&chaos_multipaxos_app_process);
 
+static unsigned proposal_idx = 1;
+
 /* Wireless Multi-Paxos Application */
 PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
   PROCESS_BEGIN();
@@ -95,41 +99,51 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
   while (1) {
     PROCESS_YIELD();
 
-    /* node has Synchrotron group membership */
-    if (chaos_has_node_index) {
-      /* final values agreed upon, if any */
+    if (round_count_local > CW_CONF_SYNC_ROUND_NUM) {
+      uint16_t round = round_count_local - CW_CONF_SYNC_ROUND_NUM;
+      printf("<RND> r:%u\n", round);
       if (IS_INITIATOR()) {
-        printf("<PP> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, 0, 0); /* 1 slot = 6ms */
+        /* Just use the slot number of the initiator for evalutation. */
+        printf("<SLOT_CNT> r:%u cnt:%u\n", round, complete + 1);
       }
-      if (value_chosen) {
-        // printf("{rd %u chosen values} ", round_count_local);
-        uint8_t i;
-        for (i = 0; i < MULTIPAXOS_PKT_SIZE; i++) printf("%u,", multipaxos_chosen_values[i]);
-        printf("\n");
-        printf("<CM> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, commit, commit * 6); /* 1 slot = 6ms */
-        if (IS_INITIATOR()) {
-          uint16_t complete_slot = multipaxos_get_completion_slot();
-          printf("<CP> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, complete_slot, complete_slot * 6); /* 1 slot = 6ms */
+
+      /* node has Synchrotron group membership */
+      if (chaos_has_node_index) {
+        /* final values agreed upon, if any */
+        if (value_chosen) {
+          if (IS_INITIATOR()) {
+            printf("<PP> e:%u r:%u s:%u t:%u\n", proposal_idx, round, 0, 0); /* 1 slot = 6ms */
+          }
+          proposal_idx++;
+          // printf("{rd %u chosen values} ", round_count_local);
+          // uint8_t i;
+          // for (i = 0; i < MULTIPAXOS_PKT_SIZE; i++) printf("%u,", multipaxos_chosen_values[i]);
+          // printf("\n");
+          printf("<CM> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, commit, commit * 6); /* 1 slot = 6ms */
+          if (IS_INITIATOR()) {
+            printf("<CP> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, complete, complete * 6); /* 1 slot = 6ms */
+          }
+          // printf("{rd %u complete} %u ms\n", round_count_local, complete*6); /* 1 slot = 6ms */
+
+        } else {
+          printf("{rd %u chosen values} No values were chosen this round.\n", round_count_local);
         }
-        // printf("{rd %u complete} %u ms\n", round_count_local, complete*6); /* 1 slot = 6ms */
+        /* Print full completion latency (see paper for definition) */
+        // printf("{rd %u full completion latency} %u ms\n", round_count_local, multipaxos_get_completion_slot()*6); /* 1 slot = 6ms */
 
-      } else {
-        printf("{rd %u chosen values} No values were chosen this round.\n", round_count_local);
+  /* Print advanced statistics */
+  #if MULTIPAXOS_ADVANCED_STATISTICS
+        /* print internal state of the node */
+        multipaxos_app_print_advanced_statistics();
+        /* reset statistics variables */
+        memset(&multipaxos_statistics_flags_evolution_per_slot, 0, sizeof(multipaxos_statistics_flags_evolution_per_slot));
+  #endif
+
+      } else { /* end if chaos_has_node_index */
+        printf("{rd %u res} multipaxos: waiting to join, n: %u\n", round_count_local, chaos_node_count);
       }
-      /* Print full completion latency (see paper for definition) */
-      printf("{rd %u full completion latency} %u ms\n", round_count_local, multipaxos_get_completion_slot()*6); /* 1 slot = 6ms */
-
-/* Print advanced statistics */
-#if MULTIPAXOS_ADVANCED_STATISTICS
-      /* print internal state of the node */
-      multipaxos_app_print_advanced_statistics();
-      /* reset statistics variables */
-      memset(&multipaxos_statistics_flags_evolution_per_slot, 0, sizeof(multipaxos_statistics_flags_evolution_per_slot));
-#endif
-
-    } else { /* end if chaos_has_node_index */
-      printf("{rd %u res} multipaxos: waiting to join, n: %u\n", round_count_local, chaos_node_count);
     }
+
   }
   PROCESS_END();
 }

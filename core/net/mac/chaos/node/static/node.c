@@ -42,6 +42,7 @@
 #include "node.h"
 #include "node-id.h"
 #include "net/mac/chaos/node/testbed.h"
+#include "project-conf.h"
 
 uint8_t chaos_node_index = 0;
 uint8_t chaos_has_node_index = 0;

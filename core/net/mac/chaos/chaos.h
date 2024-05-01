@@ -53,7 +53,7 @@
 #include "net/mac/chaos/node/testbed.h"
 #include "chaos-config.h"
 
-#define NETSTACK_CONF_WITH_CHAOS_LEADER_ELECTION (NETSTACK_CONF_WITH_CHAOS_NODE_DYNAMIC==3)
+#define NETSTACK_CONF_WITH_CHAOS_LEADER_ELECTION 0
 
 #ifndef CHAOS_LEADER_ELECTION_TIMEOUT
 #define CHAOS_LEADER_ELECTION_TIMEOUT 64
@@ -214,6 +214,7 @@ enum {
 //#define FF_N_TX 			5
 //#endif
 
+#define INITIATOR_NODE CW_CONF_LEADER_ID
 
 /**
  * \brief Check if the nodeId matches the one of the initiator.
