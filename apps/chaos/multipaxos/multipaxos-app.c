@@ -101,7 +101,6 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
 
     if (round_count_local > CW_CONF_SYNC_ROUND_NUM) {
       uint16_t round = round_count_local - CW_CONF_SYNC_ROUND_NUM;
-      printf("<RND> r:%u\n", round);
       if (IS_INITIATOR()) {
         /* Just use the slot number of the initiator for evalutation. */
         printf("<SLOT_CNT> r:%u cnt:%u\n", round, complete + 1);
@@ -138,7 +137,7 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
         /* reset statistics variables */
         memset(&multipaxos_statistics_flags_evolution_per_slot, 0, sizeof(multipaxos_statistics_flags_evolution_per_slot));
   #endif
-
+        printf("<RND> r:%u\n", round);
       } else { /* end if chaos_has_node_index */
         printf("{rd %u res} multipaxos: waiting to join, n: %u\n", round_count_local, chaos_node_count);
       }
