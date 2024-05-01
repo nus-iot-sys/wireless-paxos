@@ -109,19 +109,19 @@ PROCESS_THREAD(chaos_multipaxos_app_process, ev, data) {
 
       /* node has Synchrotron group membership */
       if (chaos_has_node_index) {
+        proposal_idx = round;
         /* final values agreed upon, if any */
         if (value_chosen) {
           if (IS_INITIATOR()) {
             printf("<PP> e:%u r:%u s:%u t:%u\n", proposal_idx, round, 0, 0); /* 1 slot = 6ms */
           }
-          proposal_idx++;
           // printf("{rd %u chosen values} ", round_count_local);
           // uint8_t i;
           // for (i = 0; i < MULTIPAXOS_PKT_SIZE; i++) printf("%u,", multipaxos_chosen_values[i]);
           // printf("\n");
-          printf("<CM> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, commit, commit * 6); /* 1 slot = 6ms */
+          printf("<CM> e:%u r:%u s:%u t:%u\n", proposal_idx, round, commit, commit * 6); /* 1 slot = 6ms */
           if (IS_INITIATOR()) {
-            printf("<CP> e:%u r:%u s:%u t:%u\n", round_count_local, round_count_local, complete, complete * 6); /* 1 slot = 6ms */
+            printf("<CP> e:%u r:%u s:%u t:%u\n", proposal_idx, round, complete, complete * 6); /* 1 slot = 6ms */
           }
           // printf("{rd %u complete} %u ms\n", round_count_local, complete*6); /* 1 slot = 6ms */
 

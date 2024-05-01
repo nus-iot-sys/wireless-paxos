@@ -178,7 +178,6 @@ static chaos_state_t process(uint16_t round_count, uint16_t slot_count, chaos_st
      */
     /* if min_proposal is 0, we haven't received any Paxos request yet */
     if (payload->phase == MULTIPAXOS_INIT) {
-      COOJA_DEBUG_PRINTF("init\n");
       /* ----- BEGIN LEADER - INITIATE PAXOS ALGORITHM (1/1) */
       if (multipaxos_state.leader.is_leader) {
         /* reset flags */
